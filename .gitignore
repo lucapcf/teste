@@ -1,0 +1,42 @@
+# Build directories
+build/
+bin/
+obj/
+
+# IDE files
+.vscode/
+.idea/
+*.cbp
+*.layout
+*.depend
+
+# Compiled binaries
+*.exe
+*.out
+CarpaDiem
+
+# Object files
+*.o
+*.obj
+
+# Libraries
+*.a
+*.so
+*.dll
+
+# Log files
+*.log
+
+# Temporary files
+*~
+*.tmp
+*.bak
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# External dependencies (se baixadas localmente)
+external/
