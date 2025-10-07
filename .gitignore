@@ -37,6 +37,3 @@ CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
 Makefile
-
-# External dependencies (se baixadas localmente)
-external/
