@@ -2,15 +2,17 @@
 
 Fedora:
 ```bash
-sudo dnf install glfw-devel
+sudo dnf install cmake g++ glfw-devel
 ```
 
 Debian:
 ```bash
-sudo apt install cmake libglfw3-dev libxi-dev
+sudo apt install cmake g++ libglfw3-dev libxi-dev
 ```
 
 # Execution
 ```bash
-cd .. && rm -rf build && mkdir build && cd build && cmake .. && make
+mkdir build
+cd build
+cmake .. && make
 ```
