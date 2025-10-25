@@ -1,0 +1,295 @@
+---
+- name: Setup Dotfiles and System Configuration
+  hosts: localhost
+  connection: local
+  become: yes # Most tasks require sudo
+
+  vars_prompt:
+    - name: "stow_etc"
+      prompt: "Do you want to symlink 'etc' configurations to /? (Y/n)"
+      private: no
+      default: "Y"
+
+  vars:
+    # We need stow for /etc, rsync for /home
+    core_tools_packages:
+      - git
+      - stow
+      - rsync
+    xorg_common_packages:
+      - xclip
+      - maim
+      - bc
+    wayland_common_packages:
+      - wl-clipboard
+    additional_packages:
+      - alacritty
+      - kitty
+      - neovim
+      - picom
+      - waybar
+      - wofi
+      - feh
+      - xbindkeys
+      - fastfetch
+      - tree
+      - tldr
+      - bash-completion
+      - nemo
+      - vlc
+      - htop
+      - chromium
+      - libreoffice
+      - qbittorrent
+      - awk
+      - zathura
+      - zathura-pdf-poppler
+      - ShellCheck
+      - firefox
+
+    # OS-specific package lists
+    os_packages:
+      RedHat:
+        upgrade_cmd: "sudo dnf upgrade -y"
+        build_tools:
+          - '@development-tools'
+          - libX11-devel
+          - libXft-devel
+          - libXinerama-devel
+          - libXrandr-devel
+        xorg_server:
+          - xorg-x11-server-Xorg
+          - xorg-x11-xinit
+          - xautolock
+          - xsetroot
+          - '@cinnamon-desktop'
+        wayland_config:
+          - hyprland
+          - waybar
+        other: []
+      Debian:
+        upgrade_cmd: "sudo apt-get upgrade -y"
+        build_tools:
+          - build-essential
+          - libx11-dev
+          - libxft-dev
+          - libxinerama-dev
+          - libxrandr-dev
+        xorg_server:
+          - xserver-xorg
+          - xinit
+          - xautolock
+          - xsetroot
+          - cinnamon
+        wayland_config: []
+        other:
+          - firefox-esr
+      Archlinux:
+        upgrade_cmd: "sudo pacman -Syu --noconfirm"
+        build_tools:
+          - base-devel
+          - libx11
+          - libxft
+          - libxinerama
+        xorg_server:
+          - xorg-server
+          - xorg-xinit
+          - xorg-xsetroot
+          - cinnamon
+        wayland_config:
+          - hyprland
+          - hyprpaper
+          - waybar
+        other: []
+
+  tasks:
+    # --- 1. Update Repositories and Upgrade ---
+    - name: "Update repositories and upgrade all packages"
+      ansible.builtin.shell: "{{ os_packages[ansible_os_family].upgrade_cmd }}"
+      when: ansible_os_family in os_packages
+      changed_when: false
+
+    # --- 2. Install Dependencies ---
+    - name: "Install all required packages"
+      vars:
+        all_packages: >-
+          {{
+            core_tools_packages +
+            xorg_common_packages +
+            wayland_common_packages +
+            additional_packages +
+            os_packages[ansible_os_family].build_tools +
+            os_packages[ansible_os_family].xorg_server +
+            os_packages[ansible_os_family].wayland_config +
+            os_packages[ansible_os_family].other
+          }}
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ all_packages }}"
+      ignore_errors: yes
+
+    # --- 3. Install yay (Arch Linux specific) ---
+    - name: "Install yay (for Arch Linux)"
+      when: ansible_os_family == 'Archlinux'
+      become: no # Run as user
+      block:
+        - name: "Check if yay is installed"
+          ansible.builtin.command: "which yay"
+          register: yay_check
+          ignore_errors: yes
+          changed_when: false
+
+        - name: "Clone and build yay"
+          when: yay_check.rc != 0
+          block:
+            - name: "Clone yay-bin repository"
+              ansible.builtin.git:
+                repo: "https://aur.archlinux.org/yay-bin.git"
+                dest: "{{ ansible_env.HOME }}/src/yay-bin"
+
+            - name: "Build and install yay"
+              ansible.builtin.shell: "makepkg -si --noconfirm"
+              args:
+                chdir: "{{ ansible_env.HOME }}/src/yay-bin"
+                creates: "/usr/bin/yay"
+
+        - name: "Install xautolock from AUR"
+          ansible.builtin.command: "yay -S --noconfirm --needed xautolock"
+          changed_when: false
+      ignore_errors: yes
+
+    # --- 4. Install Nerd Font ---
+    - name: "Install Ubuntu Mono Nerd Font"
+      become: no # Run as user
+      vars:
+        font_dir: "{{ ansible_env.HOME }}/.local/share/fonts/UbuntuMonoNerdFont"
+      block:
+        - name: "Check if font is already installed"
+          ansible.builtin.stat:
+            path: "{{ font_dir }}"
+          register: font_dir_stat
+
+        - name: "Install font download tools"
+          ansible.builtin.package:
+            name: ['wget', 'unzip']
+            state: present
+          become: yes
+          when: not font_dir_stat.stat.exists
+
+        - name: "Download and unzip font"
+          when: not font_dir_stat.stat.exists
+          block:
+            - name: "Create font directory"
+              ansible.builtin.file:
+                path: "{{ font_dir }}"
+                state: directory
+                mode: '0755'
+
+            - name: "Download UbuntuMono Nerd Font"
+              ansible.builtin.get_url:
+                url: "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/UbuntuMono.zip"
+                dest: "/tmp/UbuntuMono.zip"
+
+            - name: "Unzip font"
+              ansible.builtin.unarchive:
+                src: "/tmp/UbuntuMono.zip"
+                dest: "{{ font_dir }}"
+                remote_src: yes
+              register: font_unzip
+
+        - name: "Update font cache"
+          ansible.builtin.command: "fc-cache -fv"
+          when: font_unzip.changed
+          changed_when: false
+
+    # --- 5. Sync User Configs (Replicates 'stow $HOME') ---
+    - name: "Sync user configurations to $HOME"
+      become: no # Run as the user
+      vars:
+        dotfiles_root: "{{ playbook_dir }}"
+      block:
+        - name: "Find all top-level packages to sync"
+          ansible.builtin.find:
+            paths: "{{ dotfiles_root }}"
+            file_type: directory
+            max_depth: 1
+          register: dotfile_dirs
+
+        - name: "Create list of packages to sync (all except 'etc', 'usr', '.git')"
+          ansible.builtin.set_fact:
+            home_packages: "{{ dotfile_dirs.files | map(attribute='path') | map('basename') | reject('in', ['etc', 'usr', '.git']) | list }}"
+
+        - name: "Sync each package to $HOME using rsync"
+          ansible.posix.synchronize:
+            src: "{{ dotfiles_root }}/{{ item }}/"
+            dest: "{{ ansible_env.HOME }}/"
+            mode: "push"
+            recursive: yes
+            delete: yes  # Deletes files in $HOME that are not in the repo
+            rsync_opts:
+              - "--exclude=.git"
+              - "--checksum" # Use checksum to determine if files changed
+          loop: "{{ home_packages }}"
+
+    # --- 6. Stow System Configs (for /etc and /usr) ---
+    - name: "Stow system-wide configurations"
+      become: yes # Needs sudo
+      vars:
+        dotfiles_root: "{{ playbook_dir }}"
+      block:
+        - name: "Stow 'etc' directory to /"
+          ansible.builtin.command: "stow --adopt -R -t / etc"
+          args:
+            chdir: "{{ dotfiles_root }}"
+          when: stow_etc | bool # Use the variable from vars_prompt
+
+        - name: "Check if 'usr' directory exists"
+          ansible.builtin.stat:
+            path: "{{ dotfiles_root }}/usr"
+          register: usr_dir_stat
+
+        - name: "Stow 'usr' directory to /"
+          ansible.builtin.command: "stow --adopt -R -t / usr"
+          args:
+            chdir: "{{ dotfiles_root }}"
+          when: usr_dir_stat.stat.exists
+
+    # --- 7. Compile Suckless Tools ---
+    - name: "Compile and install Suckless tools"
+      become: yes # 'make install' needs sudo
+      vars:
+        suckless_base_dir: "{{ ansible_env.HOME }}/.config"
+        suckless_apps:
+          - dwm
+          - st
+          - dmenu
+          - slock
+      ansible.builtin.make:
+        chdir: "{{ suckless_base_dir }}/{{ item }}"
+        target: "install"
+      loop: "{{ suckless_apps }}"
+      ignore_errors: yes
+
+    # --- 8. Finalize Setup ---
+    - name: "Finalize setup"
+      vars:
+        dotfiles_root: "{{ playbook_dir }}"
+      block:
+        - name: "Restore any adopted files in dotfiles repo (from stow)"
+          ansible.builtin.command: "git restore ."
+          args:
+            chdir: "{{ dotfiles_root }}"
+          become: no
+          changed_when: false
+
+        - name: "Enable login via TTY (set default to multi-user.target)"
+          ansible.builtin.command: "systemctl set-default multi-user.target"
+          changed_when: false
+
+        - name: "Display final recommendations"
+          ansible.builtin.debug:
+            msg:
+              - "🎉 All done! Your system is configured."
+              - "Please REBOOT or log out for all changes to take effect."
+
