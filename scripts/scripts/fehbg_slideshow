@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Kill any existing wallpaper script
+kill "$(pgrep -f fehbg_ | grep -v '^'"$$"'$')" 2> /dev/null || :
+
+update_wallpaper() {
+    while true; do
+      for image in $(echo $WALLPAPER_DIR/* | tr ' ' '\n' | sort); do
+            feh --no-fehbg --bg-fill "$image"
+            sleep 30
+        done
+    done
+}
+
+update_wallpaper &
+

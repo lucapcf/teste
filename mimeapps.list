@@ -1,0 +1,92 @@
+[Default Applications]
+
+# Web / HTML
+text/html=org.mozilla.firefox.desktop
+x-scheme-handler/http=org.mozilla.firefox.desktop
+x-scheme-handler/https=org.mozilla.firefox.desktop
+x-scheme-handler/about=org.mozilla.firefox.desktop
+x-scheme-handler/unknown=org.mozilla.firefox.desktop
+x-scheme-handler/chrome=org.mozilla.firefox.desktop
+application/x-extension-htm=org.mozilla.firefox.desktop
+application/x-extension-html=org.mozilla.firefox.desktop
+application/x-extension-shtml=org.mozilla.firefox.desktop
+application/xhtml+xml=org.mozilla.firefox.desktop
+application/x-extension-xhtml=org.mozilla.firefox.desktop
+application/x-extension-xht=org.mozilla.firefox.desktop
+
+# Email / News / Feeds / Calendar
+x-scheme-handler/mailto=userapp-Thunderbird-GJOOD3.desktop
+message/rfc822=userapp-Thunderbird-GJOOD3.desktop
+x-scheme-handler/mid=userapp-Thunderbird-GJOOD3.desktop
+x-scheme-handler/news=userapp-Thunderbird-8ROJD3.desktop
+x-scheme-handler/snews=userapp-Thunderbird-8ROJD3.desktop
+x-scheme-handler/nntp=userapp-Thunderbird-8ROJD3.desktop
+x-scheme-handler/feed=userapp-Thunderbird-CETKD3.desktop
+application/rss+xml=userapp-Thunderbird-CETKD3.desktop
+application/x-extension-rss=userapp-Thunderbird-CETKD3.desktop
+x-scheme-handler/webcal=userapp-Thunderbird-6TCLD3.desktop
+x-scheme-handler/webcals=userapp-Thunderbird-6TCLD3.desktop
+text/calendar=userapp-Thunderbird-6TCLD3.desktop
+application/x-extension-ics=userapp-Thunderbird-6TCLD3.desktop
+
+# Documents
+application/pdf=org.mozilla.firefox.desktop
+
+# Images
+image/jpg=org.mozilla.firefox.desktop
+image/jpeg=org.mozilla.firefox.desktop
+image/png=org.mozilla.firefox.desktop
+image/x-png=org.mozilla.firefox.desktop
+image/gif=org.mozilla.firefox.desktop
+image/webp=org.mozilla.firefox.desktop
+
+# Audio
+audio/mpeg=vlc.desktop
+audio/mp3=vlc.desktop
+audio/x-wav=vlc.desktop
+audio/x-opus+ogg=vlc.desktop
+audio/x-m4a=vlc.desktop
+
+# Video
+video/mp4=vlc.desktop
+video/webm=vlc.desktop
+video/mpeg=vlc.desktop
+
+# Text
+text/plain=nvim.desktop
+text/x-log=nvim.desktop
+text/x-readme=nvim.desktop
+text/x-markdown=nvim.desktop
+text/x-shellscript=nvim.desktop
+text/x-python=nvim.desktop
+text/x-csrc=nvim.desktop
+text/x-c++src=nvim.desktop
+application/json=nvim.desktop
+application/xml=nvim.desktop
+application/x-sh=nvim.desktop
+application/x-yaml=nvim.desktop
+
+
+[Added Associations]
+
+# Web / HTML
+x-scheme-handler/http=org.mozilla.firefox.desktop;
+x-scheme-handler/https=org.mozilla.firefox.desktop;
+text/html=org.mozilla.firefox.desktop;
+x-scheme-handler/chrome=org.mozilla.firefox.desktop;
+
+# Email / News / Feeds / Calendar
+x-scheme-handler/mailto=userapp-Thunderbird-GJOOD3.desktop;
+x-scheme-handler/mid=userapp-Thunderbird-GJOOD3.desktop;
+x-scheme-handler/news=userapp-Thunderbird-8ROJD3.desktop;
+x-scheme-handler/snews=userapp-Thunderbird-8ROJD3.desktop;
+x-scheme-handler/nntp=userapp-Thunderbird-8ROJD3.desktop;
+x-scheme-handler/feed=userapp-Thunderbird-CETKD3.desktop;
+application/rss+xml=userapp-Thunderbird-CETKD3.desktop;
+application/x-extension-rss=userapp-Thunderbird-CETKD3.desktop;
+x-scheme-handler/webcal=userapp-Thunderbird-6TCLD3.desktop;
+x-scheme-handler/webcals=userapp-Thunderbird-6TCLD3.desktop;
+
+# Documents
+application/pdf=chromium-browser.desktop;org.mozilla.firefox.desktop
+

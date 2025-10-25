@@ -1,0 +1,104 @@
+# For the benefit of emacs users: -*- shell-script -*-
+###########################
+# xbindkeys configuration #
+###########################
+#
+# Version: 1.8.7
+#
+# If you edit this file, do not forget to uncomment any lines
+# that you change.
+# The pound(#) symbol may be used anywhere for comments.
+#
+# To specify a key, you can use 'xbindkeys --key' or
+# 'xbindkeys --multikey' and put one of the two lines in this file.
+#
+# The format of a command line is:
+#    "command to start"
+#       associated key
+#
+#
+# A list of keys is in /usr/include/X11/keysym.h and in
+# /usr/include/X11/keysymdef.h
+# The XK_ is not needed.
+#
+# List of modifier:
+#   Release, Control, Shift, Mod1 (Alt), Mod2 (NumLock),
+#   Mod3 (CapsLock), Mod4, Mod5 (Scroll).
+#
+
+# The release modifier is not a standard X modifier, but you can
+# use it if you want to catch release events instead of press events
+
+# By defaults, xbindkeys does not pay attention with the modifiers
+# NumLock, CapsLock and ScrollLock.
+# Uncomment the lines above if you want to pay attention to them.
+
+#keystate_numlock = enable
+#keystate_capslock = enable
+#keystate_scrolllock= enable
+
+# Commands:
+
+# Decrease brightness
+"brightnessctl -d intel_backlight s 1000-"
+    XF86MonBrightnessDown
+
+# Increase brightness
+"brightnessctl -d intel_backlight s +1000"
+    XF86MonBrightnessUp
+
+# Mute microphone
+"pactl set-source-mute @DEFAULT_SOURCE@ toggle"
+    XF86AudioMicMute
+
+# Decrease volume
+"pactl set-sink-volume @DEFAULT_SINK@ -1% && pactl set-sink-mute @DEFAULT_SINK@ false && $HOME/dwm/scripts/refresh.sh"
+    XF86AudioLowerVolume
+
+# Mute volume
+"pactl set-sink-mute @DEFAULT_SINK@ toggle && $HOME/dwm/scripts/refresh.sh"
+    XF86AudioMute
+
+# Increase volume
+"pactl set-sink-volume @DEFAULT_SINK@ +1% && pactl set-sink-mute @DEFAULT_SINK@ false && $HOME/dwm/scripts/refresh.sh"
+    XF86AudioRaiseVolume
+
+# Screenshot
+"maim -s | xclip -selection clipboard -t image/png"
+    Print
+
+# Open Discord
+"flatpak run com.discordapp.Discord"
+    Mod4 + g
+
+# Open pavucontrol
+"pavucontrol"
+    Mod4 + o
+
+# Open file manager
+"$FILE_MANAGER"
+    Mod4 + p
+
+# Shutdown
+"shutdown -P now"
+    Mod4 + Shift + period
+
+# Open Spotify
+"flatpak run com.spotify.Client"
+    Mod4 + s
+
+# Open terminal
+"$TERMINAL"
+    Mod4 + Return
+
+# Open browser
+"$BROWSER"
+    Mod4 + y
+
+# Lock
+"slock"
+    Mod4 + l
+
+##################################
+# End of xbindkeys configuration #
+##################################

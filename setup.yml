@@ -41,11 +41,9 @@
       - chromium
       - libreoffice
       - qbittorrent
-      - awk
       - zathura
       - zathura-pdf-poppler
       - ShellCheck
-      - firefox
 
     # OS-specific package lists
     os_packages:
@@ -66,7 +64,10 @@
         wayland_config:
           - hyprland
           - waybar
-        other: []
+        other:
+          - firefox
+          - ShellCheck
+          - awk
       Debian:
         upgrade_cmd: "sudo apt-get upgrade -y"
         build_tools:
@@ -79,11 +80,12 @@
           - xserver-xorg
           - xinit
           - xautolock
-          - xsetroot
+          - x11-utils
           - cinnamon
         wayland_config: []
         other:
           - firefox-esr
+          - shellcheck
       Archlinux:
         upgrade_cmd: "sudo pacman -Syu --noconfirm"
         build_tools:
@@ -100,7 +102,10 @@
           - hyprland
           - hyprpaper
           - waybar
-        other: []
+        other:
+          - firefox
+          - shellcheck
+          - awk
 
   tasks:
     # --- 1. Update Repositories and Upgrade ---
@@ -146,12 +151,12 @@
             - name: "Clone yay-bin repository"
               ansible.builtin.git:
                 repo: "https://aur.archlinux.org/yay-bin.git"
-                dest: "{{ ansible_env.HOME }}/src/yay-bin"
+                dest: "{{ ansible_user_dir }}/src/yay-bin"
 
             - name: "Build and install yay"
               ansible.builtin.shell: "makepkg -si --noconfirm"
               args:
-                chdir: "{{ ansible_env.HOME }}/src/yay-bin"
+                chdir: "{{ ansible_user_dir }}/src/yay-bin"
                 creates: "/usr/bin/yay"
 
         - name: "Install xautolock from AUR"
@@ -163,7 +168,7 @@
     - name: "Install Ubuntu Mono Nerd Font"
       become: no # Run as user
       vars:
-        font_dir: "{{ ansible_env.HOME }}/.local/share/fonts/UbuntuMonoNerdFont"
+        font_dir: "{{ ansible_user_dir }}/.local/share/fonts/UbuntuMonoNerdFont"
       block:
         - name: "Check if font is already installed"
           ansible.builtin.stat:
@@ -223,7 +228,7 @@
         - name: "Sync each package to $HOME using rsync"
           ansible.posix.synchronize:
             src: "{{ dotfiles_root }}/{{ item }}/"
-            dest: "{{ ansible_env.HOME }}/"
+            dest: "{{ ansible_user_dir }}/"
             mode: "push"
             recursive: yes
             delete: yes  # Deletes files in $HOME that are not in the repo
@@ -259,7 +264,7 @@
     - name: "Compile and install Suckless tools"
       become: yes # 'make install' needs sudo
       vars:
-        suckless_base_dir: "{{ ansible_env.HOME }}/.config"
+        suckless_base_dir: "{{ ansible_user_dir }}/.config"
         suckless_apps:
           - dwm
           - st

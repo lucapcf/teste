@@ -29,7 +29,7 @@ It uses **Ansible** to manage the entire process, including a `rsync`-based task
 
     ```bash
     cd ~/dotfiles
-    ansible-playbook setup.yml
+    ansible-playbook setup.yml -K
     ```
 
     Ansible will ask for your `sudo` password to install packages and run privileged tasks.
@@ -49,7 +49,7 @@ This setup uses a **one-way sync** model. Your git repository is the **source of
 > If you edit the "live" file (e.g., `~/.config/nvim/init.vim`), your changes will be **overwritten** the next time you run the playbook.
 
 The command to deploy all changes is always the same:
-`ansible-playbook setup.yml`
+`ansible-playbook setup.yml -K`
 
 -----
 
@@ -58,7 +58,7 @@ The command to deploy all changes is always the same:
 1.  **Edit:** Make your change to the "master" file inside the local repo.
       * `nano ~/dotfiles/alacritty/.config/alacritty/alacritty.yml`
 2.  **Deploy:** Run the Ansible playbook.
-      * `ansible-playbook setup.yml`
+      * `ansible-playbook setup.yml -K`
 3.  **(Recommended)** Commit and push your change.
       * `git add .`
       * `git commit -m "Updated alacritty theme"`
@@ -72,7 +72,7 @@ The command to deploy all changes is always the same:
       * `cd ~/dotfiles`
       * `git pull`
 2.  **Deploy:** Run the Ansible playbook.
-      * `ansible-playbook setup.yml`
+      * `ansible-playbook setup.yml -K`
 
 This will automatically apply all pulled changes (edits, creations, and deletions) to your local system.
 
@@ -87,7 +87,7 @@ You **do not need to edit the playbook** to add or remove files. The `synchroniz
 1.  **Create:** Add the new file *inside the repo*, following the correct directory structure.
       * `touch ~/dotfiles/nvim/.config/nvim/new-plugin.lua`
 2.  **Deploy:** Run the Ansible playbook.
-      * `ansible-playbook setup.yml`
+      * `ansible-playbook setup.yml -K`
       * Ansible will automatically see the new file and copy it to `~/.config/nvim/new-plugin.lua`.
 
 **To Delete a File:**
@@ -95,6 +95,6 @@ You **do not need to edit the playbook** to add or remove files. The `synchroniz
 1.  **Delete:** Delete the file *from the repo*.
       * `git rm ~/dotfiles/nvim/.config/nvim/old-plugin.lua`
 2.  **Deploy:** Run the Ansible playbook.
-      * `ansible-playbook setup.yml`
+      * `ansible-playbook setup.yml -K`
       * The playbook will see the file is missing from the source and **delete it from your system** (`~/.config/nvim/old-plugin.lua`).
 
