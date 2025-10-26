@@ -43,7 +43,6 @@
       - qbittorrent
       - zathura
       - zathura-pdf-poppler
-      - ShellCheck
 
     # OS-specific package lists
     os_packages:
@@ -218,7 +217,7 @@
           ansible.builtin.find:
             paths: "{{ dotfiles_root }}"
             file_type: directory
-            max_depth: 1
+            depth: 1
           register: dotfile_dirs
 
         - name: "Create list of packages to sync (all except 'etc', 'usr', '.git')"
